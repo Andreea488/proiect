@@ -5,6 +5,7 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
@@ -20,9 +21,14 @@ public class SiteTest {
 
     @Test
 
-    public void testMethod() {
+    public void testMethod() throws InterruptedException {
+        ChromeOptions options = new ChromeOptions();
+        String extensionPath = "D:\\ProiectFinal\\ublockoriginlite_2025.624.1503_0";
+        options.addArguments("--disable-extensions-except=" + extensionPath);
+        options.addArguments("--load-extension=" + extensionPath);
+
         //deschidem o instanta de Chrome
-        driver = new ChromeDriver();
+        driver = new ChromeDriver(options);
 
         //accesam pagina web
         driver.get("https://magento.softwaretestingboard.com/customer/account/create/");
@@ -30,8 +36,8 @@ public class SiteTest {
         //facem browser-ul in modul maximize
         driver.manage().window().maximize();
 
-        WebElement consentButtonElement = driver.findElement(By.xpath("//button[@class='fc-button fc-cta-consent fc-primary-button']"));
-        consentButtonElement.click();
+//        WebElement consentButtonElement = driver.findElement(By.xpath("//button[@class='fc-button fc-cta-consent fc-primary-button']"));
+//        consentButtonElement.click();
 
         WebElement createAnAccountElement = driver.findElement(By.xpath("(//a[text()='Create an Account'])[1]"));
         createAnAccountElement.click();
@@ -48,6 +54,7 @@ public class SiteTest {
         WebElement emailElement = driver.findElement(By.id("email_address"));
         var time = String.valueOf(Instant.now().getEpochSecond());
         String emailValue = "proiect+" + time + "@test.com";
+      //  String emailValue ="proiect@test.com";
         emailElement.sendKeys(emailValue);
 
         WebElement passwordElement = driver.findElement(By.id("password"));
@@ -96,7 +103,6 @@ public class SiteTest {
         WebElement signInElement = driver.findElement(By.xpath("//button[@class='action login primary']"));
         signInElement.click();
 
-
         //accesam pagina cu produse pentru femei
         driver.get("https://magento.softwaretestingboard.com/women.html");
 //        WebElement womenElement= driver.findElement(By.xpath("//li[@class='level0 nav-2 category-item active level-top parent ui-menu-item']"));
@@ -137,6 +143,8 @@ public class SiteTest {
 //        } catch (InterruptedException e) {
 //
 //        }
+
+        Thread.sleep(5000);
         WebElement cartIcon = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("a.action.showcart")));
         cartIcon.click();
         WebElement viewCartLink = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[@class='action viewcart']")));
@@ -149,18 +157,27 @@ public class SiteTest {
         editButtonELement.click();
 
         //inchidere reclama
-        WebElement reclamaELement = driver.findElement(By.cssSelector("iframe[id='aswift_1']"));
-        reclamaELement.click();
+     //   WebElement reclamaELement = driver.findElement(By.cssSelector("iframe[id='aswift_1']"));
+     //   reclamaELement.click();
 
-        driver.switchTo().frame("aswift_1");
-        WebElement inchidereReclamaElement =wait.until(ExpectedConditions.elementToBeClickable(By.id("dismiss-button")));
-        //WebElement inchidereReclamaElement = driver.findElement(By.id("dismiss-button"));
-        inchidereReclamaElement.click();
+//        WebElement rejectReclamaElement = driver.findElement(By.xpath("//div[@class='mask-2wi8r']"));
+//        rejectReclamaElement.click();
+
+//        driver.switchTo().frame("aswift_1");
+//        WebElement inchidereReclamaElement =wait.until(ExpectedConditions.presenceOfElementLocated(By.id("dismiss-button")));
+//        //WebElement inchidereReclamaElement = driver.findElement(By.id("dismiss-button"));
+//        inchidereReclamaElement.click();
 
 //        WebElement clearQuantity = driver.findElement(By.xpath("//a[@class='action delete']"));
 //        clearQuantity.clear();
 
-        js.executeScript("window.scrollTo(0, 400);");
+       js.executeScript("window.scrollTo(0, 400);");
+//
+//        WebDriverWait waitScroll = new WebDriverWait(driver, Duration.ofSeconds(10));
+//        waitScroll.until(ExpectedConditions.alertIsPresent());
+
+//        wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector("form#product_addtocart_form")));
+//        js.executeScript("window.scrollTo(0, 400);");
 
         //modificam cantitatea, culoarea si facem update cart
         WebElement quantityElement = driver.findElement(By.cssSelector("input[class='input-text qty']"));
@@ -179,11 +196,25 @@ public class SiteTest {
         updateCartElement.click();
 
         //add to wishlist din cos
+        //move to wish list
         WebElement addToWishListElement = driver.findElement(By.xpath("//a[@class='action towishlist']"));
         addToWishListElement.click();
 
-        //move to wish list
+//        WebElement addToWishListElement = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[@class='action towishlist']")));
+//        addToWishListElement.click();
+        wait.until(ExpectedConditions.urlContains("/wishlist"));
 
+        //mergem din nou pe pagina de cos
+        driver.get("https://magento.softwaretestingboard.com/checkout/cart");
+
+        List<WebElement> deleteButtons = driver.findElements(By.xpath("//a[@class='action action-delete']"));
+        if (deleteButtons.isEmpty()) {
+            System.out.println("Produsul a fost mutat în wishlist. Coșul este gol.");
+        } else {
+            System.out.println("Produsul este încă în coș. Se poate șterge.");
+            // Șterge-l dacă e cazul
+            deleteButtons.get(0).click();
+        }
 
         //delete cart button
         // WebElement deleteCartButtonElement= driver.findElement(By.xpath("//a[@class='action action-delete']"));
@@ -191,9 +222,8 @@ public class SiteTest {
 //        WebElement deleteCartButtonElement = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[@class='action action-delete']")));
 //        deleteCartButtonElement.click();
 //        wait.until(ExpectedConditions.alertIsPresent());
-        WebElement deleteButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[@class='action action-delete']//span[text()='Remove item']")));
-        deleteButton.click();
-
+//        WebElement deleteButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[@class='action action-delete']//span[text()='Remove item']")));
+//        deleteButton.click();
 
     }
 }
